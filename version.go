@@ -95,11 +95,11 @@ func (b *StrictVersionBuilder) value() (*Version, error) {
 		return nil, ErrEmptyString
 	}
 
-	parts, err := splitIntoParts(b.v)
+	var err error
+	b.parts, err = splitIntoParts(b.v)
 	if err != nil {
 		return nil, err
 	}
-	b.parts = parts
 
 	b.sv = &Version{
 		original: b.v,
@@ -110,16 +110,33 @@ func (b *StrictVersionBuilder) value() (*Version, error) {
 		return nil, err
 	}
 
+	err = b.extractBuildPrerelease()
+	if err != nil {
+		return nil, err
+	}
+
 	return StrictNewVersion(b.sv, b.parts)
 }
 
 func (b *StrictVersionBuilder) extractBuildMetadata() error {
-	// Extract build metadata
 	if strings.Contains(b.parts[2], "+") {
 		extra := strings.SplitN(b.parts[2], "+", 2)
 		b.sv.metadata = extra[1]
 		b.parts[2] = extra[0]
 		if err := validateMetadata(b.sv.metadata); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (b *StrictVersionBuilder) extractBuildPrerelease() error {
+	if strings.Contains(b.parts[2], "-") {
+		extra := strings.SplitN(b.parts[2], "-", 2)
+		b.sv.pre = extra[1]
+		b.parts[2] = extra[0]
+		if err := validatePrerelease(b.sv.pre); err != nil {
 			return err
 		}
 	}
@@ -133,15 +150,6 @@ func (b *StrictVersionBuilder) extractBuildMetadata() error {
 // If you want to coerce a version such as 1 or 1.2 and parse it as the 1.x
 // releases of semver did, use the NewVersion() function.
 func StrictNewVersion(sv *Version, parts []string) (*Version, error) {
-	// Extract build prerelease
-	if strings.Contains(parts[2], "-") {
-		extra := strings.SplitN(parts[2], "-", 2)
-		sv.pre = extra[1]
-		parts[2] = extra[0]
-		if err := validatePrerelease(sv.pre); err != nil {
-			return nil, err
-		}
-	}
 
 	// Validate the number segments are valid. This includes only having positive
 	// numbers and no leading 0's.
