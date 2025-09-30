@@ -28,7 +28,7 @@ var CoerceNewVersion = true
 var DetailedNewVersionErrors = true
 
 var (
-	// ErrInvalidSemVer is returned a version is found to be invalid when
+	// ErrInvalidSemVer is returned when a version is found to be invalid when
 	// being parsed.
 	ErrInvalidSemVer = errors.New("invalid semantic version")
 
@@ -94,10 +94,9 @@ func StrictNewVersion(v string) (*Version, error) {
 		return nil, ErrEmptyString
 	}
 
-	// Split the parts into [0]major, [1]minor, and [2]patch,prerelease,build
-	parts := strings.SplitN(v, ".", 3)
-	if len(parts) != 3 {
-		return nil, ErrInvalidSemVer
+	parts, err := splitIntoParts(v)
+	if err != nil {
+		return nil, err
 	}
 
 	sv := &Version{
@@ -137,7 +136,6 @@ func StrictNewVersion(v string) (*Version, error) {
 	}
 
 	// Extract major, minor, and patch
-	var err error
 	sv.major, err = strconv.ParseUint(parts[0], 10, 64)
 	if err != nil {
 		return nil, err
@@ -154,6 +152,16 @@ func StrictNewVersion(v string) (*Version, error) {
 	}
 
 	return sv, nil
+}
+
+// splitIntoParts splits the version into [0]major, [1]minor, and [2]patch,prerelease,build
+func splitIntoParts(v string) ([]string, error) {
+	parts := strings.SplitN(v, ".", 3)
+	if len(parts) != 3 {
+		return nil, ErrInvalidSemVer
+	}
+
+	return parts, nil
 }
 
 // NewVersion parses a given version and returns an instance of Version or
