@@ -100,7 +100,11 @@ func (b *StrictVersionBuilder) value() (*Version, error) {
 	}
 	b.parts = parts
 
-	return StrictNewVersion(b.v, b.parts)
+	sv := &Version{
+		original: b.v,
+	}
+
+	return StrictNewVersion(sv, b.parts)
 }
 
 // StrictNewVersion parses a given version and returns an instance of Version or
@@ -108,11 +112,7 @@ func (b *StrictVersionBuilder) value() (*Version, error) {
 // Performs checking that can find errors within the version.
 // If you want to coerce a version such as 1 or 1.2 and parse it as the 1.x
 // releases of semver did, use the NewVersion() function.
-func StrictNewVersion(v string, parts []string) (*Version, error) {
-	sv := &Version{
-		original: v,
-	}
-
+func StrictNewVersion(sv *Version, parts []string) (*Version, error) {
 	// Extract build metadata
 	if strings.Contains(parts[2], "+") {
 		extra := strings.SplitN(parts[2], "+", 2)
