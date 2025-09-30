@@ -70,7 +70,7 @@ func TestStrictNewVersion(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		builder := StrictVersionBuilder{tc.version}
+		builder := StrictVersionBuilder{v: tc.version}
 		_, err := builder.value()
 		if tc.err && err == nil {
 			t.Fatalf("expected error for version: %s", tc.version)
@@ -858,7 +858,7 @@ func TestOriginalVPrefix(t *testing.T) {
 
 func TestJsonMarshal(t *testing.T) {
 	sVer := "1.1.1"
-	builder := StrictVersionBuilder{sVer}
+	builder := StrictVersionBuilder{v: sVer}
 	x, err := builder.value()
 	if err != nil {
 		t.Errorf("Error creating version: %s", err)
@@ -891,7 +891,7 @@ func TestJsonUnmarshal(t *testing.T) {
 func TestTextMarshal(t *testing.T) {
 	sVer := "1.1.1"
 
-	builder := StrictVersionBuilder{sVer}
+	builder := StrictVersionBuilder{v: sVer}
 	x, err := builder.value()
 	if err != nil {
 		t.Errorf("Error creating version: %s", err)
@@ -927,7 +927,7 @@ func TestTextUnmarshal(t *testing.T) {
 
 func TestSQLScanner(t *testing.T) {
 	sVer := "1.1.1"
-	builder := StrictVersionBuilder{sVer}
+	builder := StrictVersionBuilder{v: sVer}
 	x, err := builder.value()
 	if err != nil {
 		t.Errorf("Error creating version: %s", err)
@@ -947,7 +947,7 @@ func TestSQLScanner(t *testing.T) {
 
 func TestDriverValuer(t *testing.T) {
 	sVer := "1.1.1"
-	builder := StrictVersionBuilder{sVer}
+	builder := StrictVersionBuilder{v: sVer}
 	x, err := builder.value()
 	if err != nil {
 		t.Errorf("Error creating version: %s", err)
@@ -1021,7 +1021,7 @@ func FuzzStrictNewVersion(f *testing.F) {
 	}
 
 	f.Fuzz(func(_ *testing.T, a string) {
-		builder := StrictVersionBuilder{a}
+		builder := StrictVersionBuilder{v: a}
 		_, _ = builder.value()
 	})
 }

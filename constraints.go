@@ -301,7 +301,7 @@ func parseConstraint(c string) (*constraint, error) {
 
 	// The rest is the special case where an empty string was passed in which
 	// is equivalent to * or >=0.0.0
-	builder := StrictVersionBuilder{"0.0.0"}
+	builder := StrictVersionBuilder{v: "0.0.0"}
 	con, err := builder.value()
 	if err != nil {
 

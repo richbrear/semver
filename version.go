@@ -83,10 +83,24 @@ const (
 
 type StrictVersionBuilder struct {
 	v string
+	parts []string
 }
 
-func (b StrictVersionBuilder) value() (*Version, error) {
-	return StrictNewVersion(b.v)
+func (b *StrictVersionBuilder) value() (*Version, error) {
+	// Parsing here does not use RegEx in order to increase performance and reduce
+	// allocations.
+
+	if len(b.v) == 0 {
+		return nil, ErrEmptyString
+	}
+
+	parts, err := splitIntoParts(b.v)
+	if err != nil {
+		return nil, err
+	}
+	b.parts = parts
+
+	return StrictNewVersion(b.v, b.parts)
 }
 
 // StrictNewVersion parses a given version and returns an instance of Version or
@@ -94,19 +108,7 @@ func (b StrictVersionBuilder) value() (*Version, error) {
 // Performs checking that can find errors within the version.
 // If you want to coerce a version such as 1 or 1.2 and parse it as the 1.x
 // releases of semver did, use the NewVersion() function.
-func StrictNewVersion(v string) (*Version, error) {
-	// Parsing here does not use RegEx in order to increase performance and reduce
-	// allocations.
-
-	if len(v) == 0 {
-		return nil, ErrEmptyString
-	}
-
-	parts, err := splitIntoParts(v)
-	if err != nil {
-		return nil, err
-	}
-
+func StrictNewVersion(v string, parts []string) (*Version, error) {
 	sv := &Version{
 		original: v,
 	}
@@ -144,6 +146,7 @@ func StrictNewVersion(v string) (*Version, error) {
 	}
 
 	// Extract major, minor, and patch
+	var err error
 	sv.major, err = strconv.ParseUint(parts[0], 10, 64)
 	if err != nil {
 		return nil, err
