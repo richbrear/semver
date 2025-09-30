@@ -194,7 +194,8 @@ func benchNewVersion(v string, b *testing.B) {
 
 func benchStrictNewVersion(v string, b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, _ = StrictNewVersion(v)
+		builder := StrictVersionBuilder{v}
+		_, _ = builder.value()
 	}
 }
 

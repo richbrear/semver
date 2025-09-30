@@ -81,6 +81,14 @@ const (
 	allowed string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-" + num
 )
 
+type StrictVersionBuilder struct {
+	v string
+}
+
+func (b StrictVersionBuilder) value() (*Version, error) {
+	return StrictNewVersion(b.v)
+}
+
 // StrictNewVersion parses a given version and returns an instance of Version or
 // an error if unable to parse the version. Only parses valid semantic versions.
 // Performs checking that can find errors within the version.

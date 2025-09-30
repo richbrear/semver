@@ -743,7 +743,8 @@ func TestConstraintsValidate(t *testing.T) {
 		}
 	}
 
-	v, err := StrictNewVersion("1.2.3")
+	builder := StrictVersionBuilder{"1.2.3"}
+	v, err := builder.value()
 	if err != nil {
 		t.Errorf("err: %s", err)
 	}
@@ -814,7 +815,8 @@ func TestConstraintsValidate(t *testing.T) {
 			continue
 		}
 
-		v, err := StrictNewVersion(tc.version)
+		builder := StrictVersionBuilder{tc.version}
+		v, err := builder.value()
 		if err != nil {
 			t.Errorf("version parsing err: %s", err)
 			continue
@@ -945,7 +947,8 @@ func TestConstraintsValidateIncludePrerelease(t *testing.T) {
 		}
 	}
 
-	v, err := StrictNewVersion("1.2.3")
+	builder := StrictVersionBuilder{"1.2.3"}
+	v, err := builder.value()
 	if err != nil {
 		t.Errorf("err: %s", err)
 	}
@@ -1027,7 +1030,8 @@ func TestConstraintsValidateIncludePrerelease(t *testing.T) {
 		}
 		c.IncludePrerelease = true
 
-		v, err := StrictNewVersion(tc.version)
+		builder := StrictVersionBuilder{tc.version}
+		v, err := builder.value()
 		if err != nil {
 			t.Errorf("version parsing err: %s", err)
 			continue
