@@ -84,6 +84,7 @@ const (
 type StrictVersionBuilder struct {
 	v string
 	parts []string
+	sv *Version
 }
 
 func (b *StrictVersionBuilder) value() (*Version, error) {
@@ -100,11 +101,30 @@ func (b *StrictVersionBuilder) value() (*Version, error) {
 	}
 	b.parts = parts
 
-	sv := &Version{
+	b.sv = &Version{
 		original: b.v,
 	}
 
-	return StrictNewVersion(sv, b.parts)
+	err = b.extractBuildMetadata()
+	if err != nil {
+		return nil, err
+	}
+
+	return StrictNewVersion(b.sv, b.parts)
+}
+
+func (b *StrictVersionBuilder) extractBuildMetadata() error {
+	// Extract build metadata
+	if strings.Contains(b.parts[2], "+") {
+		extra := strings.SplitN(b.parts[2], "+", 2)
+		b.sv.metadata = extra[1]
+		b.parts[2] = extra[0]
+		if err := validateMetadata(b.sv.metadata); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // StrictNewVersion parses a given version and returns an instance of Version or
@@ -113,16 +133,6 @@ func (b *StrictVersionBuilder) value() (*Version, error) {
 // If you want to coerce a version such as 1 or 1.2 and parse it as the 1.x
 // releases of semver did, use the NewVersion() function.
 func StrictNewVersion(sv *Version, parts []string) (*Version, error) {
-	// Extract build metadata
-	if strings.Contains(parts[2], "+") {
-		extra := strings.SplitN(parts[2], "+", 2)
-		sv.metadata = extra[1]
-		parts[2] = extra[0]
-		if err := validateMetadata(sv.metadata); err != nil {
-			return nil, err
-		}
-	}
-
 	// Extract build prerelease
 	if strings.Contains(parts[2], "-") {
 		extra := strings.SplitN(parts[2], "-", 2)
